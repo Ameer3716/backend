@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
 async function testStripe() {
   try {
     const prices = await stripe.prices.list({ limit: 3 });
@@ -36,7 +36,7 @@ router.post('/create-checkout-session', async (req, res) => {
       console.error(`Invalid plan ID received: ${planId}`);
       return res.status(400).json({ error: "Invalid plan ID" });
     }
-    
+   
     try {
       console.log(`Creating session for ${email} with priceId ${priceId}`);
       const session = await stripe.checkout.sessions.create({
@@ -46,8 +46,8 @@ router.post('/create-checkout-session', async (req, res) => {
         billing_address_collection: 'auto',  // This helps avoid forcing postal address collection
         line_items: [{ price: priceId, quantity: 1 }],
         metadata: { plan: planId },
-        success_url: 'http://localhost:5174/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'http://localhost:5174/cancel',
+        success_url: `${frontendUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${frontendUrl}/cancel`,
       });
     
       console.log("Session created:", session.id);

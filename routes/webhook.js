@@ -16,10 +16,12 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
 
   let event;
   try {
-    // For testing, we’re skipping signature verification.
-    event = JSON.parse(req.body.toString());
+    // VERIFY the event signature
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log('Webhook verified successfully. Event type:', event.type);
+
   } catch (err) {
-    console.error('Error parsing webhook body:', err.message);
+    console.error(`Webhook signature verification failed: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
