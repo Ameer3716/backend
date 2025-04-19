@@ -15,6 +15,15 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
   console.log('Stripe-Signature header:', sig);
 
   let event;
+  if (!endpointSecret) {
+    console.error("FATAL: STRIPE_WEBHOOK_SECRET is not set in environment variables!");
+    return res.status(500).send("Webhook configuration error.");
+}
+if (!sig) {
+    console.error("Webhook Error: Missing stripe-signature header");
+    return res.status(400).send("Missing Stripe signature.");
+}
+
   try {
     // VERIFY the event signature
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
