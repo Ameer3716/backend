@@ -3,16 +3,16 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
-async function testStripe() {
-  try {
-    const prices = await stripe.prices.list({ limit: 3 });
-    console.log(prices);
-  } catch (error) {
-    console.error('Stripe API Error:', error);
-  }
-}
+// async function testStripe() {
+//   try {
+//     const prices = await stripe.prices.list({ limit: 3 });
+//     console.log(prices);
+//   } catch (error) {
+//     console.error('Stripe API Error:', error);
+//   }
+// }
 
-testStripe();
+// testStripe();
 
 // Map your planId to Stripe Price IDs (update these with your real Stripe Price IDs)
 const planPrices = {
