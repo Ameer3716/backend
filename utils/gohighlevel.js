@@ -195,32 +195,44 @@ async function createOrUpdateContact(contactData) {
         console.error("🔴 GHL Create/Update Error: Email or Phone is required.");
         return null;
     }
+    // Determine identifier used for lookup
     const identifier = contactData.email ? { email: contactData.email } : { phone: contactData.phone };
+    const identifierValue = contactData.email || contactData.phone;
 
     try {
         const existingContact = await lookupContact(identifier);
 
         if (existingContact && existingContact.id) {
-            // Update existing contact
-            console.log(`ℹ️ GHL: Found existing contact ${existingContact.id}, attempting update.`);
-            // Prepare update payload (don't resend email/phone if not changing)
+            // --- UPDATE LOGIC ---
+            console.log(`ℹ️ GHL: Found existing contact ${existingContact.id} for ${identifierValue}. Preparing update payload.`);
+
+            // Prepare update payload, EXCLUDING the identifier keys (email/phone)
             const updatePayload = { ...contactData };
-            delete updatePayload.email; // GHL might reject email/phone in PUT payload
-            delete updatePayload.phone;
-            return await updateContact(existingContact.id, updatePayload);
+            if (contactData.email) delete updatePayload.email;
+            if (contactData.phone) delete updatePayload.phone;
+
+            // Check if there's anything actually left in the payload to update
+            if (Object.keys(updatePayload).length > 0) {
+                console.log(`ℹ️ GHL: Attempting update for contact ${existingContact.id}.`);
+                // Pass the filtered payload containing only the fields to be updated
+                return await updateContact(existingContact.id, updatePayload);
+            } else {
+                 // This happens if contactData ONLY contained email/phone used for lookup
+                 console.log(`ℹ️ GHL: No new data provided to update contact ${existingContact.id}. Returning existing contact info.`);
+                 return existingContact; // Return the contact data found during lookup
+            }
         } else {
-            // Create new contact
-            console.log(`ℹ️ GHL: No existing contact found, attempting creation.`);
+            // --- CREATE LOGIC ---
+            console.log(`ℹ️ GHL: No existing contact found for ${identifierValue}, attempting creation.`);
+            // Pass the original full contactData for creation
             return await createContact(contactData);
         }
     } catch (error) {
-         // Errors from lookup/create/update are logged within those functions
-         console.error(`🔴 GHL createOrUpdateContact failed for ${contactData.email || contactData.phone}.`);
+         // Errors from lookup/create/update should be logged within those functions
+         console.error(`🔴 GHL createOrUpdateContact process failed for ${identifierValue}.`);
          return null;
     }
 }
-
-
 /**
  * Safely adds tags to a GoHighLevel contact by Contact ID, merging with existing tags.
  * Uses getContact and updateContact internally.
