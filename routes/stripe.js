@@ -17,9 +17,9 @@ const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
 // Map your planId to Stripe Price IDs (update these with your real Stripe Price IDs)
 const planPrices = {
   starter: "price_1R5b8BHrl8FAmdkYtODHPJcF",
-  pro: "price_1R5b9nHrl8FAmdkY051fcwxw",
-  growth: "price_1R5b98Hrl8FAmdkYYLMdMUGg",
-  agency: "price_1R5bA7Hrl8FAmdkYsCqSAwgm"
+  pro: "price_1RMmdeIOH8jdx2cRCKFvj9zv",
+  growth: "price_1RMmgzIOH8jdx2cRszcDmzJz",
+  agency: "price_1RMmkRIOH8jdx2cRaKxaFjL4"
 };
 
 function getPriceIdForPlan(planId) {
